@@ -28,8 +28,8 @@ namespace MessengerAPI
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "MessengerAPI", Version = "v1" });
             });
-            services.AddScoped<IEmailSender, GmailSender>();
-            Configurations.Add(services, Configuration.GetConnectionString("LocalHost"));
+            services.AddScoped<IEmailSender, PleskMailSender>();
+            Configurations.Add(services, Configuration.GetConnectionString("Server"),Configuration["JWT:Key"]);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -47,7 +47,7 @@ namespace MessengerAPI
 
             app.UseAuthentication();
             app.UseAuthorization();
-
+            
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();

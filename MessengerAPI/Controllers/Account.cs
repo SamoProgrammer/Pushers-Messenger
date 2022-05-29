@@ -24,10 +24,11 @@ namespace MessengerAPI.Controllers
         }
         // GET: api/<Account>
         [HttpGet]
-        [Route("api/account/ConfirmEmail/{username}/{token}")]
-        public async Task ConfirmEmail(string username, string token)
+        [Route("api/account/ConfirmEmail/{username}/{token}",Name = "ConfirmEmailAction")]
+        public async Task<IActionResult> ConfirmEmail(string username, string token)
         {
             await _userManager.ConfirmEmail(username, token);
+            return Content("ایمیل با موفق تایید شد");
         }
 
         // GET api/<Account>/5
@@ -44,7 +45,7 @@ namespace MessengerAPI.Controllers
             var res = await _userManager.Register(registercmd);
             if (res.Success)
             {
-                SendEmailAsync(registercmd.UserName, res.EmailConfirmationToken);
+                SendEmailAsync(registercmd.Email,registercmd.UserName, res.EmailConfirmationToken);
             }
             res.EmailConfirmationToken = "";
             return res;
@@ -64,8 +65,14 @@ namespace MessengerAPI.Controllers
 
 
 
-        private void SendEmailAsync(string UserName, string token)
+        private void SendEmailAsync(string email,string UserName, string token)
         {
+            string serverUrl = Url.Link("ConfirmEmailAction", new
+            {
+                username = UserName,
+                token=token
+
+            });
             string body = $"<h1> سلام {UserName} عزیز </h1><br/>" +
         $"<h4> تشکر می کنیم که از پیام رسان پوشرز استفاده می کنید . <br/>" +
         $" شما همچمنین می توانید از طریق راه های زیر با ما در ارتباط باشید <br/>" +
@@ -74,8 +81,8 @@ namespace MessengerAPI.Controllers
         $"آیدی تلگرام : M_AminK :<br/>" +
         $"دیزاینر :<br/>" +
         $" آیدی تلگرام : @Mohammadmd1383 </h4></br></br>" +
-        $"<h3><a href='{Url.ActionLink("ConfirmEmail")}/{UserName}/{token}' >تایید ایمیل </a></h3>";
-            _emailSender.SendEmail("Callofdutyblackops4", "arcamingamer@gmail.com", "تایید ایمیل", body, true, "aminkarvizi1384@gmail.com", 587, "smtp.gmail.com");
+        $"<h3><a href='{serverUrl}' >تایید ایمیل </a></h3>";
+            _emailSender.SendEmail("Amin@karvizi1384", email, "تایید ایمیل", body, true, "pmsg@pushers.ir", 25, "webmail.pushers.ir");
         }
     }
 }

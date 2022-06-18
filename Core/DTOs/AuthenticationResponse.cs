@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 
 namespace Core.DTOs
 {
-    public class JwtToken
+    public class AuthenticationResponse
     {
-        public string Token { get; set; }
+        public string AccessToken { get; set; }
+        public string RefreshToken { get; set; }
     }
 }

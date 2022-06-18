@@ -20,8 +20,9 @@ namespace Infrastructure.Services.Identity
         {
             if (!string.IsNullOrEmpty(username) && !string.IsNullOrEmpty(token))
             {
-                await _userManager.ConfirmEmailAsync(_userManager.FindByNameAsync(username).Result, token);
-                return true;
+                token = token.Replace("%2F", "/");
+                var res = await _userManager.ConfirmEmailAsync(_userManager.FindByNameAsync(username).Result, token);
+                return res.Succeeded;
             }
 
             return false;
@@ -60,6 +61,26 @@ namespace Infrastructure.Services.Identity
                 response.Errors.Add(error.Description);
             }
             return response;
+        }
+
+        public async Task<User> GetUserAsync(string userName,string password)
+        {
+
+            User user = await _userManager.FindByNameAsync(userName);
+            if (user != null && await _userManager.CheckPasswordAsync(user,password))
+            {
+                return user;
+            }
+            return null;
+        }
+        public async Task<User> GetUserByIdAsync(string id)
+        {
+            User user = await _userManager.FindByIdAsync(id);
+            if (user != null)
+            {
+                return user;
+            }
+            return null;
         }
     }
 }

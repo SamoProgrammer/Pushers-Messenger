@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using Core.DTOs;
@@ -11,6 +12,9 @@ namespace Core.Interfaces
 {
     public interface IJWTManager
     {
-        Task<JwtToken> Authenticate(LoginCommand users);
+        public string GenerateToken(string secretKey, string issure, string audience, double ExpireTime, IEnumerable<Claim> claims = null);
+        public bool ValidateRefreshTokenAsync(string refreshToken);
+        public Task<AuthenticationResponse> AuthenticateAsync(User user);
+        public string GenerateAccessToken(User user);
     }
 }

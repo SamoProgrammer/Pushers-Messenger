@@ -4,6 +4,12 @@ using Infrastructure.Services.Identity;
 using Core.ViewModels;
 using Core.Entities;
 using Infrastructure.Services.EmailService;
+using Core.Interfaces;
+using Core.DTOs;
+using Infrastructure.Services.Identity.JWT;
+using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Authorization;
+using System;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -16,53 +22,74 @@ namespace MessengerAPI.Controllers
         private UserManager _userManager;
         private IEmailSender _emailSender;
         private Microsoft.AspNetCore.Identity.UserManager<User> _aspUserManager;
-        public Account(Microsoft.AspNetCore.Identity.UserManager<User> aspUserManager, IEmailSender emailSender)
+        private JwtMediateR _jwtMediatR;
+        public Account(Microsoft.AspNetCore.Identity.UserManager<User> aspUserManager, IEmailSender emailSender, JwtMediateR jwtMediatR)
         {
             _aspUserManager = aspUserManager;
             _userManager = new UserManager(_aspUserManager);
             _emailSender = emailSender;
+            _jwtMediatR = jwtMediatR;
         }
         // GET: api/<Account>
         [HttpGet]
-        [Route("api/account/ConfirmEmail/{username}/{token}",Name = "ConfirmEmailAction")]
+        [Route("api/account/ConfirmEmail/{username}/{token}", Name = "ConfirmEmailAction")]
         public async Task<IActionResult> ConfirmEmail(string username, string token)
         {
-            await _userManager.ConfirmEmail(username, token);
-            return Content("ایمیل با موفق تایید شد");
+            var res = await _userManager.ConfirmEmail(username, token);
+            if (res)
+            {
+                return Content("ایمیل با موفق تایید شد");
+            }
+            return Content("عملیات موفقیت آمیز نبود");
+
         }
 
-        // GET api/<Account>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
+        [Route("/api/account/login")]
+        [HttpPost]
+        public async Task<AuthenticationResponse> AuthenticateAsync([FromBody] LoginCommand lcmd)
         {
-            return "value";
+            var res = await _jwtMediatR.AuthenticateAsync(lcmd);
+            return res;
+        }
+
+        [Route("/api/account/refrshtoken")]
+        [HttpPost]
+        public async Task<AuthenticationResponse> RefreshTokenAsync([FromBody] RefreshCommand refcmd)
+        {
+            return await _jwtMediatR.RefreshToken(refcmd.Token);
         }
 
         // POST api/<Account>
         [HttpPost]
-        public async Task<RegisterationResponse> Post([FromBody] RegisterationCommand registercmd)
+        [Route("/api/account/register")]
+        public async Task<RegisterationResponse> Post([FromBody] RegisterationCommand rcmd)
         {
-            var res = await _userManager.Register(registercmd);
+            var res = await _userManager.Register(rcmd);
             if (res.Success)
             {
-                SendEmailAsync(registercmd.Email,registercmd.UserName, res.EmailConfirmationToken);
+                SendEmailAsync(rcmd.Email, rcmd.UserName, res.EmailConfirmationToken);
             }
             res.EmailConfirmationToken = "";
             return res;
         }
 
-        // PUT api/<Account>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        // PUT api/<Account>/5  
+        [Route("/api/account/test")]
+        [HttpGet]
+        [EnableCors]
+        public IActionResult Test()
         {
+            var demo = User.Identity.Name;
+            return new JsonResult("Dude");
         }
 
-        // DELETE api/<Account>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
+        [Authorize]
+        [HttpGet]
+        [Route("/api/account/isAuth")]
+        public IActionResult IsAuth()
         {
+            return new JsonResult(true);
         }
-
 
 
         private void SendEmailAsync(string email,string UserName, string token)

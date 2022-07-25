@@ -1,0 +1,23 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:DesktopApp.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="DesktopApp.Views.MainWindow"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="ورود به حساب کاربری"
+        MinWidth="1280"
+        MinHeight="720">
+
+    <Design.DataContext>
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+  <Grid RowDefinitions="3*,1*,1*,1*,3*,1*,1*" ColumnDefinitions="2*,2*,2*">
+    <TextBox Grid.Row="1" Margin="0,0,0,5" Grid.Column="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Watermark="نام کاربری" FontFamily="/Assets/Fonts/Sahel.ttf#" FontSize="25" Name="UsernameInput" Text=""/>
+    <TextBox Grid.Row="2" Margin="0,5,0,0" Grid.Column="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Watermark="رمز عبور" FontFamily="/Assets/Fonts/Sahel.ttf#" FontSize="25" Name="PasswordInput" Text="" PasswordChar="*" />
+    <Button Grid.Row="3" Grid.Column="1" HorizontalContentAlignment="Center" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalContentAlignment="Center" Margin="0,10,0,0" FontFamily="/Assets/Fonts/Sahel.ttf#" FontSize="22" Name="LoginButton">ورود</Button>
+    <Button Grid.Row="4" Margin="0,0,0,10" Grid.Column="1" FontFamily="/Assets/Fonts/Sahel.ttf#" FontSize="22" Name="OpenRegisterWindow" Background="Transparent" HorizontalContentAlignment="Center" HorizontalAlignment="Stretch" Foreground="Blue">حساب کاربری ندارید؟ یکی بسازید </Button>
+    <TextBlock Grid.Row="5" Grid.RowSpan="3" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" TextAlignment="Center" Foreground="Red" Grid.Column="1" FontFamily="/Assets/Fonts/Sahel.ttf#" FontSize="22" Name="LoginErrorTextBlock" />
+  </Grid>
+</Window>

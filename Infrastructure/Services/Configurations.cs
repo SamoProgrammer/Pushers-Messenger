@@ -10,32 +10,46 @@ using Infrastructure.Services.Identity.JWT;
 using Core.Interfaces;
 using Microsoft.Extensions.Configuration;
 using System;
+using Infrastructure.Services.ContactManagement;
+using AutoMapper;
+using AutoMapper.Mappers;
+using AutoMapper.Configuration;
+using AutoMapper.Configuration.Annotations;
+using AutoMapper.Configuration.Conventions;
+using AutoMapper.Execution;
+using AutoMapper.Features;
+using AutoMapper.Internal;
+using AutoMapper.QueryableExtensions.Impl;
+using AutoMapper.QueryableExtensions;
+using Infrastructure.Services.ChatManagement;
 
 namespace Infrastructure.Services
 {
     public static class Configurations
     {
-        public static void Add(IServiceCollection services,IConfiguration configuration)
+        public static void Add(IServiceCollection services,Microsoft.Extensions.Configuration.IConfiguration configuration,Type startup)
         {
+            #region IOC
             var jwtSettings = new JWTSettings();
             configuration.Bind(nameof(JWTSettings), jwtSettings);
             services.AddSingleton(jwtSettings);
-
-
             services.AddScoped<JwtMediateR>();
-
-            services.AddScoped<IUserManager, Infrastructure.Services.Identity.UserManager>();
-
+            services.AddScoped<IUserManager, Identity.UserManager>();
+            services.AddScoped<IContactManager, ContactManager>();
+            services.AddScoped<IJWTManager, JWTManager>();
+            services.AddScoped<IChatManager, ChatManager>();
+            #endregion
+            #region Database
             services.AddDbContext<AppDbContext>(options =>
-                options.UseSqlServer(configuration.GetConnectionString("Server")));
-
-
+                options.UseSqlServer(configuration.GetConnectionString("LocalHost")));
+            #endregion
+            #region Auth
             services.AddIdentity<User,IdentityRole<int>>().AddEntityFrameworkStores<AppDbContext>().AddErrorDescriber<PersianIdentityErrorDescriber>().AddTokenProvider<DataProtectorTokenProvider<User>>(TokenOptions.DefaultProvider);
-            services.AddAuthentication(options=> {
+            services.AddAuthentication(options => {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            }).AddJwtBearer(jwt=> {
+            }).AddJwtBearer(jwt => {
                 jwt.SaveToken = true;
                 jwt.TokenValidationParameters = new TokenValidationParameters()
                 {
@@ -50,7 +64,8 @@ namespace Infrastructure.Services
                     ClockSkew = TimeSpan.Zero
                 };
             });
-
+            #endregion
+            #region AuthSettings
             services.Configure<IdentityOptions>(options =>
             {
                 // Password settings.
@@ -65,9 +80,12 @@ namespace Infrastructure.Services
                 options.User.AllowedUserNameCharacters =
                 "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
                 options.User.RequireUniqueEmail = true;
-            });
 
-            services.AddScoped<IJWTManager, JWTManager>();
+                options.Lockout.MaxFailedAccessAttempts = 5;
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
+            });
+            #endregion
+            services.AddAutoMapper(typeof(Mapper.ReceivedFriendRequestProfile),typeof(Mapper.ReceivedFriendRequestProfile),typeof(Mapper.FriendProfile),typeof(Mapper.ChatsProfile),typeof(Mapper.ChatsProfile),typeof(Mapper.SimpleContactProfile));
         }
     }
 }

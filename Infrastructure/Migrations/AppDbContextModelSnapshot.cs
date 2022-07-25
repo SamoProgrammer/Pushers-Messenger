@@ -19,24 +19,120 @@ namespace Infrastructure.Migrations
                 .HasAnnotation("ProductVersion", "5.0.17")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("Core.Entities.Friend", b =>
+            modelBuilder.Entity("Core.Entities.Chat", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int?>("UserId")
+                    b.HasKey("Id");
+
+                    b.ToTable("Chats");
+                });
+
+            modelBuilder.Entity("Core.Entities.ChatContact", b =>
+                {
+                    b.Property<int>("ChatId")
                         .HasColumnType("int");
 
-                    b.Property<string>("UserName")
+                    b.Property<int>("ContactId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ChatTitle")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ChatId", "ContactId");
+
+                    b.HasIndex("ContactId");
+
+                    b.ToTable("ChatContacts");
+                });
+
+            modelBuilder.Entity("Core.Entities.Contact", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Username")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+                    b.ToTable("Contacts");
+                });
+
+            modelBuilder.Entity("Core.Entities.Friend", b =>
+                {
+                    b.Property<int?>("ContactId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("FriendContactId")
+                        .HasColumnType("int");
+
+                    b.HasIndex("ContactId");
+
+                    b.HasIndex("FriendContactId");
 
                     b.ToTable("Friends");
+                });
+
+            modelBuilder.Entity("Core.Entities.FriendRequest", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("FromContactId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Text")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("ToContactId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FromContactId");
+
+                    b.HasIndex("ToContactId");
+
+                    b.ToTable("FriendRequests");
+                });
+
+            modelBuilder.Entity("Core.Entities.Message", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("ChatId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SenderId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("SentDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Text")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChatId");
+
+                    b.HasIndex("SenderId");
+
+                    b.ToTable("Messages");
                 });
 
             modelBuilder.Entity("Core.Entities.RefreshToken", b =>
@@ -53,6 +149,8 @@ namespace Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("RefreshTokens");
                 });
@@ -254,11 +352,83 @@ namespace Infrastructure.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
+            modelBuilder.Entity("Core.Entities.ChatContact", b =>
+                {
+                    b.HasOne("Core.Entities.Chat", "Chat")
+                        .WithMany()
+                        .HasForeignKey("ChatId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Core.Entities.Contact", "Contact")
+                        .WithMany()
+                        .HasForeignKey("ContactId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Chat");
+
+                    b.Navigation("Contact");
+                });
+
             modelBuilder.Entity("Core.Entities.Friend", b =>
                 {
+                    b.HasOne("Core.Entities.Contact", "Contact")
+                        .WithMany()
+                        .HasForeignKey("ContactId");
+
+                    b.HasOne("Core.Entities.Contact", "FriendContact")
+                        .WithMany()
+                        .HasForeignKey("FriendContactId");
+
+                    b.Navigation("Contact");
+
+                    b.Navigation("FriendContact");
+                });
+
+            modelBuilder.Entity("Core.Entities.FriendRequest", b =>
+                {
+                    b.HasOne("Core.Entities.Contact", "FromContact")
+                        .WithMany("SentFriendRequests")
+                        .HasForeignKey("FromContactId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Core.Entities.Contact", "ToContact")
+                        .WithMany("ReceivedFriendRequests")
+                        .HasForeignKey("ToContactId");
+
+                    b.Navigation("FromContact");
+
+                    b.Navigation("ToContact");
+                });
+
+            modelBuilder.Entity("Core.Entities.Message", b =>
+                {
+                    b.HasOne("Core.Entities.Chat", "Chat")
+                        .WithMany("Messages")
+                        .HasForeignKey("ChatId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Core.Entities.Contact", "Sender")
+                        .WithMany()
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Chat");
+
+                    b.Navigation("Sender");
+                });
+
+            modelBuilder.Entity("Core.Entities.RefreshToken", b =>
+                {
                     b.HasOne("Core.Entities.User", "User")
-                        .WithMany("Friends")
-                        .HasForeignKey("UserId");
+                        .WithMany("RefreshTokens")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("User");
                 });
@@ -314,9 +484,21 @@ namespace Infrastructure.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Core.Entities.Chat", b =>
+                {
+                    b.Navigation("Messages");
+                });
+
+            modelBuilder.Entity("Core.Entities.Contact", b =>
+                {
+                    b.Navigation("ReceivedFriendRequests");
+
+                    b.Navigation("SentFriendRequests");
+                });
+
             modelBuilder.Entity("Core.Entities.User", b =>
                 {
-                    b.Navigation("Friends");
+                    b.Navigation("RefreshTokens");
                 });
 #pragma warning restore 612, 618
         }

@@ -13,8 +13,9 @@ namespace Core.Interfaces
     public interface IJWTManager
     {
         public string GenerateToken(string secretKey, string issure, string audience, double ExpireTime, IEnumerable<Claim> claims = null);
-        public bool ValidateRefreshTokenAsync(string refreshToken);
+        public bool ValidateRefreshToken(string refreshToken);
         public Task<AuthenticationResponse> AuthenticateAsync(User user);
         public string GenerateAccessToken(User user);
+        Task<bool> SignoutAsync(string refreshToken, int userId);
     }
 }

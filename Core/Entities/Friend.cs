@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
@@ -10,9 +9,10 @@ namespace Core.Entities
 {
     public class Friend
     {
-        [Key]
-        public int Id { get; set; }
-        public string UserName { get; set; }
-        public User User { get; set; }
+        public Contact Contact { get; set; }
+        public int? ContactId { get; set; }
+
+        public string FriendUsername { get; set; }
+        public int FriendContactId { get; set; }
     }
 }

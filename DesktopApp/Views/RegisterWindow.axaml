@@ -1,0 +1,25 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="DesktopApp.Views.RegisterWindow"
+        Title="ساخت حساب کاربری"
+                MinWidth="1280"
+        MinHeight="720">
+
+  <Grid RowDefinitions="1*,1*,1*,1*,1*,1*,2*" ColumnDefinitions="2*,4*,2*">
+    <TextBox Text="" Grid.Row="1" Margin="0,0,0,5" Grid.Column="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Watermark="نام کاربری" FontFamily="/Assets/Fonts/Sahel.ttf#" FontSize="25" Name="UsernameInput"/>
+    <TextBox Text="" Grid.Row="2" Margin="0,0,0,5" Grid.Column="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Watermark="ایمیل" FontFamily="/Assets/Fonts/Sahel.ttf#" FontSize="25" Name="EmailInput"/>
+    <TextBox Text="" Grid.Row="3" Margin="0,0,0,5" Grid.Column="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Watermark="رمز عبور" FontFamily="/Assets/Fonts/Sahel.ttf#" FontSize="25" Name="PasswordInput" PasswordChar="*" />
+    <TextBox Text="" Grid.Row="4" Margin="0,0,0,5" Grid.Column="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Watermark="تکرار رمز عبور" FontFamily="/Assets/Fonts/Sahel.ttf#" FontSize="25" Name="ConfirmPasswordInput" PasswordChar="*" />
+    <Button Grid.Row="5" Grid.Column="1" HorizontalContentAlignment="Center" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalContentAlignment="Center" Margin="0,10,0,0" FontFamily="/Assets/Fonts/Sahel.ttf#" FontSize="22" Name="RegisterButton" Click="OnRegisterClick">ثبت</Button>
+    <StackPanel Name="ErrorBox" Grid.Row="6" Grid.Column="1" >
+      
+    <TextBlock HorizontalAlignment="Stretch" TextAlignment="Center" Foreground="Red" FontFamily="/Assets/Fonts/Sahel.ttf#" FontSize="22" />
+    <TextBlock HorizontalAlignment="Stretch" TextAlignment="Center" Foreground="Red" FontFamily="/Assets/Fonts/Sahel.ttf#" FontSize="22" />
+    <TextBlock HorizontalAlignment="Stretch" TextAlignment="Center" Foreground="Red" FontFamily="/Assets/Fonts/Sahel.ttf#" FontSize="22" />
+    <TextBlock HorizontalAlignment="Stretch" TextAlignment="Center" Foreground="Red" FontFamily="/Assets/Fonts/Sahel.ttf#" FontSize="22" />
+    </StackPanel>
+  </Grid>
+</Window>

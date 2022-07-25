@@ -10,5 +10,8 @@ namespace Core.Interfaces
         Task<bool> ConfirmEmail(string username,string token);
         Task<User> GetUserAsync(string userName,string password);
         Task<User> GetUserByIdAsync(string id);
+        Task<bool> IsLockOutUserAsync(User user);
+        Task<User> GetUserByNameAsync(string userName);
+        Task<string> GetSignInErrorsAsync(string userName, string password);
     }
 }

@@ -25,28 +25,55 @@ namespace Infrastructure.Services.Identity.JWT
 
         public async Task<AuthenticationResponse> AuthenticateAsync(LoginCommand loginCmd)
         {
-            User user = await _userManager.GetUserAsync(loginCmd.UserName, loginCmd.Password);
-            if (user is not null)
+            try
             {
-                return await _jwtManager.AuthenticateAsync(user);
+                string error = await _userManager.GetSignInErrorsAsync(loginCmd.UserName, loginCmd.Password);
+                if (string.IsNullOrEmpty(error))
+                {
+                    return await _jwtManager.AuthenticateAsync(await _userManager.GetUserAsync(loginCmd.UserName, loginCmd.Password));
+                };
+                return new AuthenticationResponse()
+                {
+                    Error = error,
+                    AccessToken = "",
+                    RefreshToken = ""
+                };
             }
-            return null;
+            catch (System.Exception)
+            {
+
+                return new AuthenticationResponse()
+                {
+                    Error = "خطا در انجام عملیات",
+                    RefreshToken = "",
+                    AccessToken = ""
+                };
+            }
         }
         public async Task<AuthenticationResponse> RefreshToken(string refToken)
         {
             if (!string.IsNullOrEmpty(refToken))
             {
-                var isValidRefreshToken = _jwtManager.ValidateRefreshTokenAsync(refToken);
 
-                var refreshToken = await _dbContext.RefreshTokens.FirstOrDefaultAsync(x => x.Token == refToken);
+                var refreshToken = await _dbContext.RefreshTokens.Include(t => t.User).FirstOrDefaultAsync(x => x.Token == refToken);
 
                 if (refreshToken != null)
                 {
-                    var user = await _userManager.GetUserByIdAsync(refreshToken.UserId.ToString());
-                    return await _jwtManager.AuthenticateAsync(user);
+                    if (_jwtManager.ValidateRefreshToken(refreshToken.Token))
+                    {
+                        var user = refreshToken.User;
+                        _dbContext.Remove(refreshToken);
+                        await _dbContext.SaveChangesAsync();
+                        return await _jwtManager.AuthenticateAsync(user);
+                    }
                 }
             }
             return null;
+        }
+
+        public async Task<bool> SignoutAsync(string refreshToken, int userId)
+        {
+            return await _jwtManager.SignoutAsync(refreshToken,userId);
         }
     }
 }

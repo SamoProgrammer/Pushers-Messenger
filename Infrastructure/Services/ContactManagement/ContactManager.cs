@@ -47,6 +47,7 @@ namespace Infrastructure.Services.ContactManagement
             {
                 var senderContact = (await _context.Contacts.Include(c => c.ReceivedFriendRequests).SingleOrDefaultAsync(c => c.UserId == requesterId));
                 var receiverContact = await _context.Contacts.Include(c => c.ReceivedFriendRequests).SingleOrDefaultAsync(c => c.Username == friendRequestViewModel.FriendUsername);
+                if (senderContact == null || receiverContact == null) return false;
                 if (senderContact == receiverContact)
                 {
                     return false;
@@ -150,8 +151,8 @@ namespace Infrastructure.Services.ContactManagement
                     },
                 };
 
-                await _context.AddAsync(new ChatContact() { ContactId = friendRequest.ToContactId.Value, ChatTitle = friendRequest.FromContact.Username, Chat = chat });
-                await _context.AddAsync(new ChatContact() { ContactId = friendRequest.FromContactId, ChatTitle = friendRequest.ToContact.Username, Chat = chat });
+                await _context.AddAsync(new ChatContact() { Seen = false, ContactId = friendRequest.FromContactId, ChatTitle = friendRequest.ToContact.Username, Chat = chat });
+                await _context.AddAsync(new ChatContact() { Seen = false, ContactId = friendRequest.ToContactId.Value, ChatTitle = friendRequest.FromContact.Username, Chat = chat });
                 _context.Remove(friendRequest);
                 await _context.SaveChangesAsync();
                 return true;
@@ -189,58 +190,56 @@ namespace Infrastructure.Services.ContactManagement
         {
             try
             {
-                var demo1 = _context.Friends.ToList();
-                var demo = _context.Friends.Include(c => c.Contact).ThenInclude(c => c.Friends).ToList();
+                Contact contact = await _context.Contacts.Include(c=>c.Friends).SingleOrDefaultAsync(c => c.UserId == userId);
+                return _mapper.Map<List<FriendDTO>>(contact.Friends);
             }
-            catch (Exception e)
+            catch
             {
-
-                var d = e;
+                return null;
             }
-            Contact contact = await _context.Contacts.SingleOrDefaultAsync(c => c.UserId == userId);
-            return _mapper.Map<List<FriendDTO>>(contact.Friends);
         }
-        public async Task<List<ChatsResponse>> GetChats(int userId)
+        public List<ChatsResponse> GetChats(int userId)
         {
-            var contactsChat = _context.ChatContacts.Include(c => c.Contact).Where(c => c.Contact.UserId == userId);
-            return _mapper.Map<List<ChatsResponse>>(contactsChat);
+            try
+            {
+                var contactsChat = _context.ChatContacts.Include(c => c.Chat).ThenInclude(c => c.Messages).Include(c=>c.Chat).ThenInclude(c=>c.Contacts).Where(c => c.Contact.UserId == userId).ToList();
+                var res = _mapper.Map<List<ChatsResponse>>(contactsChat);
+                return res;
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         public async Task<ChatResponse> GetChat(int userId, int chatId, int skipCount)
         {
-            Chat chat = await _context.Chats.Include(c => c.Contacts).Include(c => c.Messages).SingleOrDefaultAsync(c => c.Id == chatId);
-            Contact contact = await _context.Contacts.IgnoreAutoIncludes().SingleOrDefaultAsync(c => c.UserId == userId);
-            if (!chat.Contacts.Exists(c => c == contact))
+            try
             {
+                Chat chat = await GetChatById(chatId);
+                Contact contact = await GetContactByUserAsync(userId);
+                if (!chat.Contacts.Exists(c => c == contact))
+                {
+                    return null;
+                }
+                var res = new ChatResponse()
+                {
+                    Messages = _mapper.Map<List<SimpleMessage>>(chat.Messages.OrderBy(c => c.SentDate).SkipLast(skipCount).TakeLast(20).ToList()),
+                    Contacts = _mapper.Map<List<SimpleContact>>(chat.Contacts),
+                    AllMessagesCount = chat.Messages.Count
+                };
+                return res;
+            }
+            catch (Exception ex)
+            {
+                var demo = ex;
                 return null;
             }
-            var res = new ChatResponse()
-            {
-                Messages = chat.Messages.OrderBy(c => c.SentDate).SkipLast(skipCount).TakeLast(20).ToList().ConvertAll<SimpleMessage>(
-
-                m => new SimpleMessage()
-                {
-                    ChatId = m.ChatId,
-                    Id = m.Id,
-                    SenderId = m.SenderId,
-                    SentDate = m.SentDate,
-                    Text = m.Text,
-                    IsDeliverd = true
-                }
-                ),
-                Contacts = chat.Contacts.ConvertAll<SimpleContact>(c => new SimpleContact()
-                {
-                    Id = c.Id,
-                    Username = c.Username,
-                }),
-                AllMessagesCount = chat.Messages.Count
-            };
-            return res;
         }
 
         public async Task<Chat> GetChatById(int chatId)
         {
-            return await _context.Chats.Include(c => c.Contacts).SingleOrDefaultAsync(c => c.Id == chatId);
+            return await _context.Chats.Include(c => c.Contacts).Include(c=>c.Messages).SingleOrDefaultAsync(c => c.Id == chatId);
         }
 
         public async Task<ChatsResponse> InsertGroupAsync(List<int> contactsIds, string title)
@@ -251,7 +250,7 @@ namespace Infrastructure.Services.ContactManagement
                 var contacts = contactsIds.ConvertAll<Contact>(c => _context.Contacts.Find(c));
                 foreach (var contact in contacts)
                 {
-                    await _context.AddAsync(new ChatContact() { ContactId = contact.Id, ChatTitle = title, Chat = chat });
+                    await _context.AddAsync(new ChatContact() { ContactId = contact.Id, ChatTitle = title, Chat = chat, Seen = false });
                 }
                 await _context.SaveChangesAsync();
                 return new ChatsResponse()

@@ -16,7 +16,6 @@ using System.Security.Claims;
 
 namespace MessengerAPI.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
     public class AccountController : ControllerBase
     {
@@ -34,7 +33,7 @@ namespace MessengerAPI.Controllers
             _userManager = new UserManager(_aspUserManager, signInManager, contactManager);
         }
         [HttpGet]
-        [Route("api/account/ConfirmEmail/{username}/{token}", Name = "ConfirmEmailAction")]
+        [Route("/api/account/ConfirmEmail", Name = "ConfirmEmailAction")]
         public async Task<IActionResult> ConfirmEmail(string username, string token)
         {
             var res = await _userManager.ConfirmEmail(username, token);

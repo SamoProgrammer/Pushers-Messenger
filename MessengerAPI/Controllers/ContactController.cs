@@ -78,7 +78,7 @@ namespace MessengerAPI.Controllers
         public async Task<IActionResult> GetChats()
         {
             int Id = int.Parse(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value);
-            return Json(await _contactManager.GetChats(Id));
+            return Json(_contactManager.GetChats(Id));
         }
 
         [Authorize]

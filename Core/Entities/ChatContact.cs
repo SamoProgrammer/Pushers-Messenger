@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Core.DTOs;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
@@ -17,6 +19,10 @@ namespace Core.Entities
         public int ChatId { get; set; }
         public Chat Chat { get; set; }
 
+        [MaxLength(30)]
         public string ChatTitle { get; set; }
+        public bool Seen { get; set; }
+
+        public Message? LastMessage { get => Chat.Messages.LastOrDefault(); }
     }
 }

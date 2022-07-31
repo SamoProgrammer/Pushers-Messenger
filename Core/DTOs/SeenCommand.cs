@@ -6,12 +6,10 @@ using System.Threading.Tasks;
 
 namespace Core.DTOs
 {
-    public class ChatsResponse
+    public class SeenCommand
     {
+        public int ContactId { get; set; }
         public int ChatId { get; set; }
-        public string Title { get; set; }
-        public SimpleMessage? LastMessage { get; set; }
         public bool Seen { get; set; }
-        public List<string> ChatMembers { get; set; }
     }
 }

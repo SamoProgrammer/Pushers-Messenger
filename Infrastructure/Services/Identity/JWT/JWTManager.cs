@@ -37,7 +37,7 @@ namespace Infrastructure.Services.Identity.JWT
             var jwtSecurityToken = new JwtSecurityToken(issuer: issure,
                     audience: audience,
                     claims: claims, DateTime.UtcNow,
-                    DateTime.UtcNow.AddMinutes(ExpireTime),
+                    DateTime.UtcNow.AddSeconds(ExpireTime),
                     signingCredentials: credentials);
             return new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
         }

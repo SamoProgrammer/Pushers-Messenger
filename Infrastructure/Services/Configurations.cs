@@ -11,16 +11,6 @@ using Core.Interfaces;
 using Microsoft.Extensions.Configuration;
 using System;
 using Infrastructure.Services.ContactManagement;
-using AutoMapper;
-using AutoMapper.Mappers;
-using AutoMapper.Configuration;
-using AutoMapper.Configuration.Annotations;
-using AutoMapper.Configuration.Conventions;
-using AutoMapper.Execution;
-using AutoMapper.Features;
-using AutoMapper.Internal;
-using AutoMapper.QueryableExtensions.Impl;
-using AutoMapper.QueryableExtensions;
 using Infrastructure.Services.ChatManagement;
 
 namespace Infrastructure.Services
@@ -41,7 +31,7 @@ namespace Infrastructure.Services
             #endregion
             #region Database
             services.AddDbContext<AppDbContext>(options =>
-                options.UseSqlServer(configuration.GetConnectionString("LocalHost")));
+                options.UseSqlServer(configuration.GetConnectionString("LocalHost"), o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)));
             #endregion
             #region Auth
             services.AddIdentity<User,IdentityRole<int>>().AddEntityFrameworkStores<AppDbContext>().AddErrorDescriber<PersianIdentityErrorDescriber>().AddTokenProvider<DataProtectorTokenProvider<User>>(TokenOptions.DefaultProvider);
@@ -85,7 +75,7 @@ namespace Infrastructure.Services
                 options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
             });
             #endregion
-            services.AddAutoMapper(typeof(Mapper.ReceivedFriendRequestProfile),typeof(Mapper.ReceivedFriendRequestProfile),typeof(Mapper.FriendProfile),typeof(Mapper.ChatsProfile),typeof(Mapper.ChatsProfile),typeof(Mapper.SimpleContactProfile));
+            services.AddAutoMapper(typeof(Mapper.ReceivedFriendRequestProfile),typeof(Mapper.ReceivedFriendRequestProfile),typeof(Mapper.FriendProfile),typeof(Mapper.ChatsProfile),typeof(Mapper.ChatsProfile),typeof(Mapper.SimpleContactProfile),typeof(Mapper.SimpleMessageProfile));
         }
     }
 }

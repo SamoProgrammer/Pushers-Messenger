@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
+using Core.DTOs;
 
 namespace Infrastructure.Services.ChatManagement
 {
@@ -24,7 +25,14 @@ namespace Infrastructure.Services.ChatManagement
         {
             await _context.AddAsync<Message>(message);
             await _context.SaveChangesAsync();
-            return await _context.Messages.Include(m => m.Sender).Include(m => m.Chat).ThenInclude(c=>c.Contacts).SingleOrDefaultAsync(m => m.Id == message.Id);
+            return await _context.Messages.Include(m => m.Sender).Include(m => m.Chat).ThenInclude(c => c.Contacts).SingleOrDefaultAsync(m => m.Id == message.Id);
+        }
+
+        public async Task SeenChat(SeenCommand seenCommand)
+        {
+            var contactsChat = await _context.ChatContacts.SingleOrDefaultAsync(c => c.ContactId == seenCommand.ContactId && c.ChatId == seenCommand.ChatId);
+            contactsChat.Seen = seenCommand.Seen;
+            await _context.SaveChangesAsync();
         }
     }
 }

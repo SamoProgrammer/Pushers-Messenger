@@ -19,6 +19,7 @@ namespace Core.Entities
         public Contact? FromContact { get; set; }
         [ForeignKey("FromContact")]
         public int FromContactId { get; set; }
+        [MaxLength(100)]
         public string Text { get; set; }
     }
 }

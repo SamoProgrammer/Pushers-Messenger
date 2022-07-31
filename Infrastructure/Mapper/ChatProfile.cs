@@ -13,18 +13,15 @@ namespace Infrastructure.Mapper
     {
         public ChatProfile()
         {
-            CreateMap<Chat, ChatResponse>().ForMember(c => c.Messages, c => c.MapFrom(cr => cr.Messages.OrderBy(c => c.SentDate).TakeLast(20).ToList().ConvertAll<SimpleMessage>(
-
-                m => new SimpleMessage()
-                {
-                    ChatId = m.ChatId,
-                    Id = m.Id,
-                    SenderId = m.SenderId,
-                    SentDate = m.SentDate,
-                    Text = m.Text,
-                    IsDeliverd = true
-                }
-                )));
+            CreateMap<Chat, ChatResponse>().ForMember(c => c.Messages, c => c.MapFrom(cr => cr.Messages.OrderBy(c => c.SentDate).TakeLast(20).Select(m => new SimpleMessage()
+            {
+                ChatId = m.ChatId,
+                Id = m.Id,
+                SenderId = m.SenderId,
+                SentDate = m.SentDate,
+                Text = m.Text,
+                IsDeliverd = true
+            })));
         }
     }
 }

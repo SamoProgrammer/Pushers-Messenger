@@ -73,7 +73,7 @@ namespace Infrastructure.Services.Identity.JWT
 
         public async Task<bool> SignoutAsync(string refreshToken, int userId)
         {
-            return await _jwtManager.SignoutAsync(refreshToken,userId);
+            return await _jwtManager.SignoutAsync(refreshToken, userId);
         }
     }
 }

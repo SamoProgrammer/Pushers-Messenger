@@ -37,6 +37,8 @@ namespace Infrastructure.Persistence.Context
             builder.Entity<Friend>().HasKey(f => new { f.FriendContactId, f.ContactId });
             builder.Entity<Contact>().HasMany<Friend>(c => c.Friends).WithOne(f => f.Contact);
 
+            builder.Entity<ChatContact>().Ignore(cc=>cc.LastMessage);
+            
             base.OnModelCreating(builder);
         }
     }

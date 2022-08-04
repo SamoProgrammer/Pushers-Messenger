@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Core.DTOs
 {
@@ -13,6 +9,6 @@ namespace Core.DTOs
         public DateTime SentDate { get; set; }
         public int ChatId { get; set; }
         public int SenderId { get; set; }
-        public bool IsDeliverd { get; set; }
+        public bool IsDelivered { get; set; }
     }
 }

@@ -1,12 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Infrastructure.Services.ContactManagement;
 using Core.Interfaces;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Core.ViewModels;
-using Core.Entities;
 using Core.DTOs;
 
 namespace MessengerAPI.Controllers
@@ -68,8 +65,8 @@ namespace MessengerAPI.Controllers
         [Route("/api/contact/getfriends")]
         public async Task<IActionResult> GetFriends()
         {
-            int Id = int.Parse(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value);
-            return Json(await _contactManager.GetFriendsAsync(Id));
+            int id = int.Parse(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value);
+            return Json(await _contactManager.GetFriendsAsync(id));
         }
 
         [Authorize]
@@ -77,7 +74,7 @@ namespace MessengerAPI.Controllers
         [Route("/api/contact/getchats")]
         public async Task<IActionResult> GetChats()
         {
-            int Id = int.Parse(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value);
+            int Id = int.Parse(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             return Json(_contactManager.GetChats(Id));
         }
 
@@ -86,8 +83,8 @@ namespace MessengerAPI.Controllers
         [Route("/api/contact/getchat")]
         public async Task<IActionResult> GetChat([FromBody] GetChatRequest chatReq)
         {
-            int Id = int.Parse(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value);
-            return Json(await _contactManager.GetChat(Id, chatReq.ChatId, chatReq.SkipCount));
+            int id = int.Parse(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            return Json(await _contactManager.GetChat(id, chatReq.ChatId, chatReq.SkipCount));
         }
 
 

@@ -1,8 +1,6 @@
 ﻿using Avalonia.Controls;
-using System.Threading.Tasks;
 using System.Net.Http;
 using System;
-using System.Text.Json;
 using System.Net.Http.Json;
 using DesktopApp.ViewModels;
 using Avalonia.Interactivity;

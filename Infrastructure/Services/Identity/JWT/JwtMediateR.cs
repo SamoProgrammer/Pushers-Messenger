@@ -1,8 +1,5 @@
-﻿using Infrastructure.Services.Identity.JWT;
-using System.Threading.Tasks;
-using System.Linq;
+﻿using System.Threading.Tasks;
 using Core.DTOs;
-using Core.Entities;
 using Core.ViewModels;
 using Core.Interfaces;
 using Infrastructure.Persistence.Context;

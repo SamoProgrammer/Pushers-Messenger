@@ -6,9 +6,7 @@ using System.Threading.Tasks;
 using Core.DTOs;
 using Core.Entities;
 using Core.Interfaces;
-using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Identity;
-using Core.ViewModels;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
@@ -30,14 +28,14 @@ namespace Infrastructure.Services.Identity.JWT
             _jwtSettings = jwtSettings;
             _appDbContext = appDbContext;
         }
-        public string GenerateToken(string secretKey, string issure, string audience, double ExpireTime, IEnumerable<Claim> claims = null)
+        public string GenerateToken(string secretKey, string issuer, string audience, double ExpireTime, IEnumerable<Claim> claims = null)
         {
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            var jwtSecurityToken = new JwtSecurityToken(issuer: issure,
+            var jwtSecurityToken = new JwtSecurityToken(issuer: issuer,
                     audience: audience,
                     claims: claims, DateTime.UtcNow,
-                    DateTime.UtcNow.AddSeconds(ExpireTime),
+                    DateTime.UtcNow.AddMinutes(ExpireTime),
                     signingCredentials: credentials);
             return new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
         }
@@ -75,7 +73,7 @@ namespace Infrastructure.Services.Identity.JWT
             if (userRefreshTokens.Count() != 0)
             {
                 _appDbContext.RefreshTokens.RemoveRange(userRefreshTokens);
-                _appDbContext.SaveChanges();
+                await _appDbContext.SaveChangesAsync();
             }
             await _appDbContext.RefreshTokens.AddAsync(new RefreshToken() { User = user, Token = refreshToken });
             await _appDbContext.SaveChangesAsync();

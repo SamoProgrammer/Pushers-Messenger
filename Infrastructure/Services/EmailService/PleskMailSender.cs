@@ -1,9 +1,5 @@
-﻿using Infrastructure.Services.EmailService;
-using System;
-using System.Collections.Generic;
-using System.Net;
+﻿using System.Net;
 using System.Net.Mail;
-using System.Text;
 
 namespace Infrastructure.Services.EmailService
 {

@@ -1,13 +1,7 @@
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
-using System;
 using System.IO;
 using System.Net.WebSockets;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Threading;
-using System.Threading.Tasks;
-using DesktopApp.DTOs;
 using ProtoBuf;
 
 namespace DesktopApp.Views

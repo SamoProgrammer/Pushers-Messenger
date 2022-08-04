@@ -1,22 +1,15 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Net;
-using Microsoft.Net.Http.Headers;
 using System;
-using System.Text;
-using System.Text.Encodings;
 using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
 using System.Linq;
 using ProtoBuf;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
-using Infrastructure.Services.ContactManagement;
 using Core.Interfaces;
-using Infrastructure.Services.ChatManagement;
 
 namespace MessengerAPI.Controllers
 {

@@ -1,15 +1,12 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.OpenApi.Models;
 using Infrastructure.Services;
 using Infrastructure.Services.EmailService;
 using Infrastructure.Services.Identity.JWT;
 using System;
-using System.Text.Json.Serialization;
 
 namespace MessengerAPI
 {
@@ -25,25 +22,17 @@ namespace MessengerAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
-            services.AddCors(options =>
-            {
-                options.AddDefaultPolicy(policy =>
-                {
-                    policy.WithOrigins("https://localhost:5001");
-                }
-                );
-            });
-
+            services.AddCors(
+                options => options.AddDefaultPolicy(opt => {
+                    opt.AllowAnyHeader();
+                    opt.AllowAnyMethod();
+                    opt.AllowAnyOrigin();
+                }));
             services.AddTransient<JwtMediateR, JwtMediateR>();
             services.AddControllers();
-            
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "MessengerAPI", Version = "v1" });
-            });
+
             services.AddScoped<IEmailSender, PleskMailSender>();
-            Configurations.Add(services, Configuration,typeof(Startup));
+            Configurations.Add(services, Configuration, typeof(Startup));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -56,12 +45,10 @@ namespace MessengerAPI
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "MessengerAPI v1"));
             }
             app.UseHttpsRedirection();
-
             app.UseRouting();
+            app.UseCors();
             app.UseAuthentication();
             app.UseAuthorization();
 

@@ -7,10 +7,7 @@ using Infrastructure.Services.EmailService;
 using Core.Interfaces;
 using Core.DTOs;
 using Infrastructure.Services.Identity.JWT;
-using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Authorization;
-using System;
-using System.Collections.Generic;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
 
@@ -73,12 +70,9 @@ namespace MessengerAPI.Controllers
         }
 
         [HttpGet]
-        [Authorize] 
+        [Authorize]
         [Route("/api/account/checkauth")]
-        public void CheckAuthentication()
-        {
-
-        }
+        public void CheckAuthentication() { }
 
         [HttpGet]
         [Authorize]

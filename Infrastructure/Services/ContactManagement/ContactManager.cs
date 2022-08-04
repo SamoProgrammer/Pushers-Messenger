@@ -3,14 +3,10 @@ using System;
 using Infrastructure.Persistence.Context;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Core.Entities;
 using Core.ViewModels;
 using Microsoft.EntityFrameworkCore;
-using System.Text.Json.Serialization;
-using System.Text.Json;
-using AutoMapper.Mappers;
 using AutoMapper;
 using Core.DTOs;
 
@@ -62,7 +58,7 @@ namespace Infrastructure.Services.ContactManagement
                     fr.FromContact.Friends.Add(new Friend()
                     {
                         Contact = fr.FromContact,
-                        FriendUsername = fr.ToContact.Username,
+                        FriendUsername = fr.ToContact!.Username,
                         FriendContactId = fr.ToContact.Id
                     });
                     fr.ToContact.Friends.Add(new Friend()
@@ -103,21 +99,23 @@ namespace Infrastructure.Services.ContactManagement
         }
         public async Task<FriendRequestResponse> GetFriendRequestsAsync(int userId)
         {
-            var contact = await _context.Set<Contact>().Include(c => c.SentFriendRequests).ThenInclude(fr => fr.ToContact).Include(c => c.ReceivedFriendRequests).ThenInclude(fr => fr.FromContact).SingleOrDefaultAsync(c => c.UserId == userId);
-            FriendRequestResponse res = new FriendRequestResponse()
+            try
             {
-                ReceivedFriendRequests = new List<ReceivedFriendRequestViewModel>(),
-                SentFriendRequests = _mapper.Map<List<(int Id, string ToContactUsername, int ToContactId, string Text)>>(contact.SentFriendRequests),
-            };
-            foreach (var fr in contact.ReceivedFriendRequests)
-            {
-                res.ReceivedFriendRequests.Add(_mapper.Map<ReceivedFriendRequestViewModel>(fr));
+                var contact = await _context.Set<Contact>().Include(c => c.SentFriendRequests).ThenInclude(fr => fr.ToContact).Include(c => c.ReceivedFriendRequests).ThenInclude(fr => fr.FromContact).SingleOrDefaultAsync(c => c.UserId == userId);
+                FriendRequestResponse res = new FriendRequestResponse()
+                {
+                    ReceivedFriendRequests = new List<ReceivedFriendRequestViewModel>(),
+                };
+                foreach (var fr in contact.ReceivedFriendRequests)
+                {
+                    res.ReceivedFriendRequests.Add(_mapper.Map<ReceivedFriendRequestViewModel>(fr));
+                }
+                return res;
             }
-            foreach (var fr in contact.SentFriendRequests)
+            catch (Exception e)
             {
-                res.SentFriendRequests.Add(_mapper.Map<(int Id, string ToContactUsername, int ToContactId, string Text)>(fr));
+                return null;
             }
-            return res;
         }
         public async Task<bool> AcceptFriendRequestAsync(int friendRequestId, int accepterId)
         {
@@ -177,13 +175,19 @@ namespace Infrastructure.Services.ContactManagement
             }
             catch (Exception)
             {
-
-                throw;
+                return false;
             }
         }
         public async Task<Contact> GetContactByUserAsync(int UserId)
         {
-            return await _context.Contacts.SingleOrDefaultAsync(c => c.UserId == UserId);
+            try
+            {
+                return await _context.Contacts.SingleOrDefaultAsync(c => c.UserId == UserId);
+            }
+            catch (Exception e)
+            {
+                return null;
+            }
         }
 
         public async Task<List<FriendDTO>> GetFriendsAsync(int userId)
@@ -232,7 +236,6 @@ namespace Infrastructure.Services.ContactManagement
             }
             catch (Exception ex)
             {
-                var demo = ex;
                 return null;
             }
         }
@@ -255,6 +258,8 @@ namespace Infrastructure.Services.ContactManagement
                 await _context.SaveChangesAsync();
                 return new ChatsResponse()
                 {
+                    Seen = false,
+                    ChatMembers = contacts.ConvertAll<string>(c=>c.Username),
                     ChatId = chat.Id,
                     Title = title
                 };
